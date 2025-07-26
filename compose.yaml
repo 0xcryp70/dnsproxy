@@ -1,0 +1,47 @@
+services:
+  nginx-proxy:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: always
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+      nproc:
+        soft: 65536
+        hard: 65536
+    sysctls:
+      - net.core.somaxconn=65536
+      - net.ipv4.tcp_tw_reuse=1
+      - net.ipv4.tcp_fin_timeout=30
+      - net.ipv4.tcp_keepalive_time=1200
+      - net.ipv4.tcp_keepalive_probes=7
+      - net.ipv4.tcp_keepalive_intvl=30
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_REQ_ZONE_SIZE: "10m"
+      API_REQ_RATE:      "10r/s"
+      API_CONN_ZONE_SIZE: "10m"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  dnsmasq:
+    #    build: dnsmasq/.
+    image: dnsmasq
+    network_mode: host
+    container_name: dnsmasq-proxy
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/udp/127.0.0.1/53 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    ulimits:
+      nofile: 1048576
+      nproc: 65536
+    volumes:
+      - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+      - ./dnsmasq/proxy.conf:/etc/dnsmasq.d/proxy.conf  
