@@ -1,6 +1,6 @@
 services:
   nginx-proxy:
-    image: nginx:latest
+    image: ghcr.io/0xcryp70/nginx:latest
     container_name: nginx-proxy
     restart: always
     ulimits:
@@ -29,7 +29,7 @@ services:
 
   dnsmasq:
     #    build: dnsmasq/.
-    image: dnsmasq
+    image: ghcr.io/0xcryp70/dnsmasq:latest
     network_mode: host
     container_name: dnsmasq-proxy
     restart: always
